@@ -1,34 +1,33 @@
 #include <stdarg.h>
 #include <unistd.h>
 
-int	ft_printnbr(long va_arg, int base, int u)
+int	ft_printnbr(long va_arg, int base, char *set,  int u)
 {
 	int	sig;
+	int	count;
+	char	str[16];
+	unsigned int	nb;
+	int	i;
 
-	long	nb;
-	long	count;
-
-	count = 0;
+	i = 0;
 	sig = 0;
-	if (va_arg < 0)
+	if (va_arg < 0 && !u)
 	{
-		write (1, '-', 1);
 		va_arg *= -1;
         	sig++;
-        	count++;
 	}
-	while (va_arg >= base)
+	nb = va_arg;
+	while (nb != 0)
 	{
-		write (1, (&va_arg % base) - '0', 1);
-		va_arg /= base;
-		count++;
+		str[i++] = set[nb % base];
+		nb /= base;
 	}
-	if (va_arg < base)
-	{
-		write (1, &va_arg, 1);
-		count++;
-	}
-	return (count + sig)
+	if (sig && !u)
+		str[i++] = '-';
+	len = i + sig;
+	while (i >= 0)
+		write (1, &str[--i], 1);
+	return (count);
 }
 
 int	ft_printchr(char *va_arg)
@@ -36,18 +35,39 @@ int	ft_printchr(char *va_arg)
 	int	i;
 
 	i = 0;
-	if (sizeof(va_arg) == 1)
+	while (va_arg[i])
 	{
-		while (va_arg[i])
-		{
-			write(1, &va_arg[i], 1);
-			i++;
-		}
+		write(1, &va_arg[i], 1);
+		i++;
 	}
 	return (i);
 }
-    
 
+int	ft_checkarg(va_list args, char flag)
+{
+	int	count;
+
+	count = 0
+	if (flag == 'c')
+		count += write(1, &va_arg(args, char), 1);
+	else if (flag == 'i' || flag == 'd')
+		count += ft_printnbr(va_arg(args, int), 10, "0123456789", 0);
+	else if (flag == 'u')
+		count += ft_printf(va_arg(args, unsigned int), 10, "0123456789", 1);
+	else if (flag == 's')
+		count += ft_printchr(va_arg(args, char *));
+	else if (flag == 'p')
+		count += ft_printchr(va_arg(args, void *));
+	else if (flag == 'x')
+		count += ft_printnbr(va_arg(args, int), 16, "0123456789abcdef", 1);
+	else if (flag == 'X')
+		count += ft_printnbr(va_arg(args, int), 16, "0123456789ABCDEF", 1);
+	else if (flag == '%')
+		count += write(1, '%', 1);
+
+}
+
+  
 int	ft_printf(const char *str, ...)
 {
 	int	i;
@@ -59,26 +79,33 @@ int	ft_printf(const char *str, ...)
 	{
 		if (str[i] == '%')
 		{
-			if (str[i++] == 'c')
+			i++;
+			if (str[i] == 'c')
 				write(1, &va_arg(args, char), 1);
-			if (str[i++] == 'i')
-				va_arg(args, int);
-			if (str[i++] == 'u')
-				va_arg(args, unsigned int);
-			if (str[i++] == 'd')
-				va_arg(args, int);
-			if (str[i++] == 's')
+			else if (str[i] == 'i' || str[i++] == 'd')
+				ft_printnbr(va_arg(args, int), 10, "0123456789", 0);
+			else if (str[i] == 'u')
+				ft_printf(va_arg(args, unsigned int), 10, "0123456789", 1);
+			else if (str[i] == 's')
 				ft_printchr(va_arg(args, char *));
-			if (str[i++] == 'p')
+			else if (str[i] == 'p')
 				ft_printchr(va_arg(args, void *));
-			if (str[i++] == 'x')
-				va_arg(args, int);
-			if (str[i++] == 'X')
-				va_arg(args, int);
-			if (str[i++] == '%')
+			else if (str[i] == 'x')
+				ft_printnbr(va_arg(args, int), 16, "0123456789abcdef", 1);
+			else if (str[i] == 'X')
+				ft_printnbr(va_arg(args, int), 16, "0123456789ABCDEF", 1);
+			else if (str[i] == '%')
+				write(1, '%', 1);
 		}
+		else
+			write(1, &str[i], 1);
 		i++;
 	}
-	write (1, &va_arg, 1);
 	va_end(args);
+}
+
+int	main(void)
+{
+	ft_printnbr(-1, 16, "0123456789abcdef", 1);
+	return (0);
 }
