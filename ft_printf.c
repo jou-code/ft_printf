@@ -6,7 +6,7 @@ int	ft_printnbr(long va_arg, int base, char *set,  int u)
 	int	sig;
 	int	count;
 	char	str[16];
-	unsigned int	nb;
+	unsigned long int	nb;
 	int	i;
 
 	i = 0;
@@ -43,34 +43,34 @@ int	ft_printchr(char *va_arg)
 	return (i);
 }
 
-int	ft_checkarg(va_list args, char flag)
+int	ft_checkspec(va_list args, char spec)
 {
 	int	count;
 	char	c;
 
-	count = 0;
-	if (flag == 'c')
+	if (spec == 'c')
 	{
 		c = va_arg(args, int);
-		count += write(1, &c, 1);
+		count = write(1, &c, 1);
 	}
-	else if (flag == 'i' || flag == 'd')
-		count += ft_printnbr(va_arg(args, int), 10, "0123456789", 0);
-	else if (flag == 'u')
-		count += ft_printnbr(va_arg(args, unsigned int), 10, "0123456789", 1);
-	else if (flag == 's')
-		count += ft_printchr(va_arg(args, char *));
-	else if (flag == 'p')
-		count += ft_printchr(va_arg(args, void *));
-	else if (flag == 'x')
+	else if (spec == 'i' || spec == 'd')
+		count = ft_printnbr(va_arg(args, int), 10, "0123456789", 0);
+	else if (spec == 'u')
+		count = ft_printnbr(va_arg(args, unsigned int), 10, "0123456789", 1);
+	else if (spec == 's')
+		count = ft_printchr(va_arg(args, char *));
+	else if (spec == 'x' || spec == 'p')
+	{
+		if (spec == 'p')
+			count = write(1, "0x", 2);
 		count += ft_printnbr(va_arg(args, int), 16, "0123456789abcdef", 1);
-	else if (flag == 'X')
-		count += ft_printnbr(va_arg(args, int), 16, "0123456789ABCDEF", 1);
-	else if (flag == '%')
-		count += write(1, "%", 1);
+	}
+	else if (spec == 'X')
+		count = ft_printnbr(va_arg(args, int), 16, "0123456789ABCDEF", 1);
+	else if (spec == '%')
+		count = write(1, "%", 1);
 	return (count);
 }
-
   
 int	ft_printf(const char *str, ...)
 {
@@ -84,13 +84,14 @@ int	ft_printf(const char *str, ...)
 	while(str[i])
 	{
 		if (str[i] == '%')
-			count += ft_checkarg(args, str[++i]);
+			count += ft_checkspec(args, str[++i]);
 		else
 			write(1, &str[i], 1);
 		count++;
 		i++;
 	}
 	va_end(args);
+	return (count);
 }
 
 int	main(void)
