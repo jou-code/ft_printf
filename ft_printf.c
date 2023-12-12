@@ -1,45 +1,83 @@
-#include <stdarg.h>
-#include <unistd.h>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_printf.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jou <marvin@42.fr>                         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/12/02 21:59:11 by jou               #+#    #+#             */
+/*   Updated: 2023/12/03 00:02:23 by jou              ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-int	ft_printnbr(long va_arg, int base, char *set,  int u)
+#include "ft_printf.h"
+
+int	ft_putptr(unsigned long arg, int base, char *set)
 {
-	int	sig;
-	int	count;
 	char	str[16];
-	unsigned long int	nb;
+	int	count;
 	int	i;
 
-	i = 0;
-	sig = 0;
-	if (va_arg < 0 && !u)
+	i = -1;
+	count = 0;
+	if (arg == 0)
+		return (write(1, "(nil)", 5));
+	else
 	{
-		va_arg *= -1;
-        	sig++;
+		while (arg != 0)
+		{
+			str[++i] = set[arg % base];
+			arg /= base;
+		}
+		count += write (1, "0x", 2);
+		while (i >= 0)
+			count += write (1, &str[i--], 1);
 	}
-	nb = va_arg;
-	while (nb != 0)
-	{
-		str[i++] = set[nb % base];
-		nb /= base;
-	}
-	if (sig && !u)
-		str[i++] = '-';
-	count = i + sig;
-	while (i >= 0)
-		write (1, &str[--i], 1);
 	return (count);
 }
 
-int	ft_printchr(char *va_arg)
+int	ft_putnbr(long arg, int base, char *set,  int u)
+{
+	int	sig;
+	char	str[16];
+	unsigned int	nb;
+	int	i;
+
+	i = -1;
+	sig = 0;
+	if (arg == 0)
+		return (write(1, "0", 1));
+	if (arg < 0 && !u)
+	{
+		arg *= -1;
+        	sig++;
+	}
+	nb = arg;
+	while (nb != 0)
+	{
+		str[++i] = set[nb % base];
+		nb /= base;
+	}
+	if (sig && !u)
+		str[++i] = '-';
+	while (i >= 0)
+		nb += write (1, &str[i--], 1);
+	return (nb);
+}
+
+int	ft_putchr(char *arg)
 {
 	int	i;
 
 	i = 0;
-	while (va_arg[i])
-	{
-		write(1, &va_arg[i], 1);
-		i++;
-	}
+	if (!arg)
+		return (write(1, "(null)", 6));
+	else
+		while (arg[i])
+		{
+			write(1, &arg[i], 1);
+			i++;
+		}
 	return (i);
 }
 
@@ -54,19 +92,17 @@ int	ft_checkspec(va_list args, char spec)
 		count = write(1, &c, 1);
 	}
 	else if (spec == 'i' || spec == 'd')
-		count = ft_printnbr(va_arg(args, int), 10, "0123456789", 0);
+		count = ft_putnbr(va_arg(args, int), 10, "0123456789", 0);
 	else if (spec == 'u')
-		count = ft_printnbr(va_arg(args, unsigned int), 10, "0123456789", 1);
+		count = ft_putnbr(va_arg(args, unsigned int), 10, "0123456789", 1);
 	else if (spec == 's')
-		count = ft_printchr(va_arg(args, char *));
+		count = ft_putchr(va_arg(args, char *));
+	else if (spec == 'p')
+		count = ft_putptr(va_arg(args, unsigned long), 16, "0123456789abcdef");
 	else if (spec == 'x' || spec == 'p')
-	{
-		if (spec == 'p')
-			count = write(1, "0x", 2);
-		count += ft_printnbr(va_arg(args, int), 16, "0123456789abcdef", 1);
-	}
+		count = ft_putnbr(va_arg(args, int), 16, "0123456789abcdef", 1);
 	else if (spec == 'X')
-		count = ft_printnbr(va_arg(args, int), 16, "0123456789ABCDEF", 1);
+		count = ft_putnbr(va_arg(args, int), 16, "0123456789ABCDEF", 1);
 	else if (spec == '%')
 		count = write(1, "%", 1);
 	return (count);
@@ -86,16 +122,19 @@ int	ft_printf(const char *str, ...)
 		if (str[i] == '%')
 			count += ft_checkspec(args, str[++i]);
 		else
+		{
 			write(1, &str[i], 1);
-		count++;
+			count++;
+		}
 		i++;
 	}
 	va_end(args);
 	return (count);
 }
-
+/*
 int	main(void)
 {
 	ft_printf("teste int %c", 't');
 	return (0);
 }
+*/
