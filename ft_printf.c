@@ -86,6 +86,7 @@ int	ft_checkspec(va_list args, char spec)
 	int	count;
 	char	c;
 
+	count = 0;
 	if (spec == 'c')
 	{
 		c = va_arg(args, int);
