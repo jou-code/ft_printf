@@ -5,14 +5,15 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: jgils <jgils@student.42.rio>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/12/02 21:59:11 by jou               #+#    #+#             */
+/*   Created: 2023/12/02 21:59:11 by jgils             #+#    #+#             */
 /*   Updated: 2024/01/14 20:07:19 by jgils            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
+#include <stdarg.h>
+#include <unistd.h>
 
-int	ft_putptr(unsigned long arg, int base, char *set)
+static int	ft_putptr(unsigned long arg, int base, char *set)
 {
 	char	str[16];
 	int	count;
@@ -36,7 +37,7 @@ int	ft_putptr(unsigned long arg, int base, char *set)
 	return (count);
 }
 
-int	ft_putnbr(long arg, int base, char *set,  int u)
+static int	ft_putnbr(long arg, int base, char *set,  int u)
 {
 	int	sig;
 	char	str[16];
@@ -65,7 +66,7 @@ int	ft_putnbr(long arg, int base, char *set,  int u)
 	return (nb);
 }
 
-int	ft_putchr(char *arg)
+static int	ft_putchr(char *arg)
 {
 	int	i;
 
@@ -81,7 +82,7 @@ int	ft_putchr(char *arg)
 	return (i);
 }
 
-int	ft_checkspec(va_list args, char spec)
+static int	ft_checkspec(va_list args, char spec)
 {
 	int	count;
 	char	c;
@@ -132,10 +133,3 @@ int	ft_printf(const char *str, ...)
 	va_end(args);
 	return (count);
 }
-/*
-int	main(void)
-{
-	ft_printf("teste int %c", 't');
-	return (0);
-}
-*/
